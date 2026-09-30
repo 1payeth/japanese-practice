@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>にほんご練習 · 日语练习</title>
+<style>
+  :root{
+    --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2b2b; --muted:#8a857a;
+    --red:#b03a2e; --red-dark:#8e2f25; --green:#3d7a4a; --line:#e5dcc9;
+    --shadow:0 2px 10px rgba(60,50,30,.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Hiragino Sans","Yu Gothic","Meiryo","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  /* ---------- 顶部 ---------- */
+  header{
+    width:100%; max-width:880px; padding:28px 20px 0;
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 16px;
+  }
+  .logo{font-size:28px; font-weight:700; letter-spacing:1px}
+  .logo span{color:var(--red)}
+  .tag{color:var(--muted); font-size:14px}
+  nav{
+    width:100%; max-width:880px; padding:16px 20px 0;
+    display:flex; gap:8px;
+  }
+  nav button{
+    border:1px solid var(--line); background:var(--card); color:var(--ink);
+    padding:9px 18px; border-radius:999px; font-size:15px; cursor:pointer;
+    transition:.15s; font-family:inherit;
+  }
+  nav button:hover{border-color:var(--red); color:var(--red)}
+  nav button.active{background:var(--red); border-color:var(--red); color:#fff}
+  main{width:100%; max-width:880px; padding:20px; flex:1}
+  footer{width:100%; max-width:880px; padding:24px 20px 32px; color:var(--muted); font-size:13px; text-align:center}
+
+  .hidden{display:none !important}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:16px;
+    box-shadow:var(--shadow); padding:28px;
+  }
+  .card + .card{margin-top:16px}
+  h2{font-size:20px; margin-bottom:14px}
+  h2 small{color:var(--muted); font-weight:400; font-size:14px; margin-left:8px}
+
+  /* ---------- 首页 ---------- */
+  .hero{display:flex; gap:16px; flex-wrap:wrap}
+  .hero .card{flex:1; min-width:240px; cursor:pointer; transition:.15s}
+  .hero .card:hover{transform:translateY(-3px); border-color:var(--red)}
+  .hero .big{font-size:44px; margin-bottom:6px}
+  .hero p{color:var(--muted); font-size:14px; line-height:1.7}
+  .word-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px}
+  .word-cell{border:1px solid var(--line); border-radius:12px; padding:14px; background:#fbf8f0; text-align:center}
+  .word-cell .jp{font-size:22px; font-weight:600}
+  .word-cell .kana{color:var(--red); font-size:14px; margin-top:2px}
+  .word-cell .cn{color:var(--muted); font-size:13px; margin-top:4px}
+
+  /* ---------- 练习区 ---------- */
+  .settings{display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin-bottom:14px}
+  .settings label{font-size:14px; color:var(--muted)}
+  select,input[type=text]{
+    font-family:inherit; font-size:15px; padding:8px 12px; border-radius:10px;
+    border:1px solid var(--line); background:#fff;
+  }
+  .btn{
+    font-family:inherit; font-size:15px; padding:10px 24px; border-radius:10px;
+    border:none; background:var(--red); color:#fff; cursor:pointer; transition:.15s;
+  }
+  .btn:hover{background:var(--red-dark)}
+  .btn.ghost{background:#fff; color:var(--ink); border:1px solid var(--line)}
+  .btn.ghost:hover{border-color:var(--red); color:var(--red)}
+  .stats{display:flex; gap:20px; margin-bottom:14px; font-size:14px; color:var(--muted); flex-wrap:wrap}
+  .stats b{color:var(--ink); font-size:16px}
+  .progress{height:6px; background:var(--line); border-radius:99px; overflow:hidden; margin-bottom:22px}
+  .progress i{display:block; height:100%; background:var(--red); width:0%; transition:.3s}
+
+  .quiz{text-align:center}
+  .kana-char{font-size:110px; font-weight:600; line-height:1.15; margin:6px 0 18px}
+  .quiz-word{font-size:42px; font-weight:600; margin:6px 0 2px}
+  .quiz-word .kana{font-size:20px; color:var(--muted); font-weight:400; margin-left:10px}
+  .quiz .q{font-size:14px; color:var(--muted); margin-bottom:10px}
+  .quiz input[type=text]{font-size:22px; text-align:center; width:220px; padding:12px; letter-spacing:2px}
+  .choices{display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:520px; margin:0 auto}
+  .choice{
+    font-family:inherit; font-size:17px; padding:16px 10px; border-radius:12px;
+    border:1px solid var(--line); background:#fff; cursor:pointer; transition:.12s;
+  }
+  .choice:hover:not(:disabled){border-color:var(--red); color:var(--red)}
+  .choice:disabled{cursor:default; opacity:.85}
+  .choice.right{background:#e6f2e8; border-color:var(--green); color:var(--green); opacity:1}
+  .choice.wrong{background:#f9e6e3; border-color:var(--red); color:var(--red); opacity:1}
+  .feedback{min-height:30px; margin-top:16px; font-size:17px}
+  .feedback.ok{color:var(--green)}
+  .feedback.no{color:var(--red)}
+  .actions{margin-top:14px; display:flex; gap:10px; justify-content:center}
+  .result{text-align:center; padding:12px 0}
+  .result .score{font-size:56px; font-weight:700; color:var(--red)}
+  .result p{color:var(--muted); margin:8px 0 18px}
+  .miss-list{text-align:left; max-width:420px; margin:0 auto 18px}
+  .miss-item{display:flex; justify-content:space-between; padding:8px 12px; border-bottom:1px dashed var(--line); font-size:15px}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<header>
+  <div class="logo">にほんご<span>練習</span></div>
+  <div class="tag">日语练习小站 · 假名 · 词汇</div>
+</header>
+
+<nav>
+  <button data-tab="home" class="active">首页</button>
+  <button data-tab="kana">假名练习</button>
+  <button data-tab="word">词汇练习</button>
+</nav>
+
+<main>
+  <!-- 首页 -->
+  <section id="tab-home">
+    <div class="hero">
+      <div class="card" onclick="switchTab('kana')">
+        <div class="big">あ</div>
+        <h2>假名练习</h2>
+        <p>平假名 / 片假名随机出题，输入罗马音作答。支持按行筛选、错题回顾，打牢五十音基础。</p>
+      </div>
+      <div class="card" onclick="switchTab('word')">
+        <div class="big">単語</div>
+        <h2>词汇练习</h2>
+        <p>精选 N5 入门词汇，看日语选释义，四选一快速自测，不知不觉中扩大词汇量。</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h2>今日单词 <small>每天认识几个新词</small></h2>
+      <div class="word-grid" id="daily-words"></div>
+    </div>
+  </section>
+
+  <!-- 假名练习 -->
+  <section id="tab-kana" class="hidden">
+    <div class="card">
+      <h2>假名练习 <small>看假名，输入对应罗马音</small></h2>
+      <div class="settings">
+        <label>类型
+          <select id="kana-type">
+            <option value="hira">平假名</option>
+            <option value="kata">片假名</option>
+            <option value="mix">混合</option>
+          </select>
+        </label>
+        <label>范围
+          <select id="kana-range">
+            <option value="all">全部</option>
+            <option value="1">あ行〜さ行</option>
+            <option value="2">た行〜は行</option>
+            <option value="3">ま行〜わ行</option>
+            <option value="4">浊音・半浊音</option>
+          </select>
+        </label>
+        <button class="btn ghost" id="kana-start">开始 / 重来</button>
+      </div>
+      <div class="stats" id="kana-stats">
+        <span>进度 <b id="kana-prog-text">0 / 0</b></span>
+        <span>答对 <b id="kana-right">0</b></span>
+        <span>正确率 <b id="kana-acc">-</b></span>
+        <span>历史最佳 <b id="kana-best">-</b></span>
+      </div>
+      <div class="progress"><i id="kana-bar"></i></div>
+      <div id="kana-play" class="hidden">
+        <div class="quiz">
+          <div class="q">这个假名怎么读？</div>
+          <div class="kana-char" id="kana-char">あ</div>
+          <input type="text" id="kana-input" placeholder="roma ji…" autocomplete="off">
+          <div class="feedback" id="kana-fb"></div>
+          <div class="actions">
+            <button class="btn" id="kana-submit">提交</button>
+            <button class="btn ghost hidden" id="kana-next">下一题 →</button>
+          </div>
+        </div>
+      </div>
+      <div id="kana-result" class="result hidden"></div>
+    </div>
+  </section>
+
+  <!-- 词汇练习 -->
+  <section id="tab-word" class="hidden">
+    <div class="card">
+      <h2>词汇练习 <small>看日语，选出正确释义</small></h2>
+      <div class="settings">
+        <label>题数
+          <select id="word-count">
+            <option value="10">10 题</option>
+            <option value="20" selected>20 题</option>
+            <option value="50">50 题（全部）</option>
+          </select>
+        </label>
+        <button class="btn ghost" id="word-start">开始 / 重来</button>
+      </div>
+      <div class="stats">
+        <span>进度 <b id="word-prog-text">0 / 0</b></span>
+        <span>答对 <b id="word-right">0</b></span>
+        <span>正确率 <b id="word-acc">-</b></span>
+        <span>历史最佳 <b id="word-best">-</b></span>
+      </div>
+      <div class="progress"><i id="word-bar"></i></div>
+      <div id="word-play" class="hidden">
+        <div class="quiz">
+          <div class="q">这个词是什么意思？</div>
+          <div class="quiz-word"><span id="word-jp"></span><span class="kana" id="word-kana"></span></div>
+          <div class="choices" id="word-choices" style="margin-top:20px"></div>
+          <div class="feedback" id="word-fb"></div>
+          <div class="actions">
+            <button class="btn ghost hidden" id="word-next">下一题 →</button>
+          </div>
+        </div>
+      </div>
+      <div id="word-result" class="result hidden"></div>
+    </div>
+  </section>
+</main>
+
+<footer>にほんご練習 · 数据保存在本机浏览器 · 加油！</footer>
+
+<script>
+/* ================= 数据 ================= */
+const KANA = {
+  hira:{"あ":"a","い":"i","う":"u","え":"e","お":"o","か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko","さ":"sa","し":["shi","si"],"す":"su","せ":"se","そ":"so","た":"ta","ち":["chi","ti"],"つ":["tsu","tu"],"て":"te","と":"to","な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no","は":"ha","ひ":"hi","ふ":["fu","hu"],"へ":"he","ほ":"ho","ま":"ma","み":"mi","む":"mu","め":"me","も":"mo","や":"ya","ゆ":"yu","よ":"yo","ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro","わ":"wa","を":"wo","ん":"n"},
+  kata:{"ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o","カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko","サ":"sa","シ":["shi","si"],"ス":"su","セ":"se","ソ":"so","タ":"ta","チ":["chi","ti"],"ツ":["tsu","tu"],"テ":"te","ト":"to","ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no","ハ":"ha","ヒ":"hi","フ":["fu","hu"],"ヘ":"he","ホ":"ho","マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo","ヤ":"ya","ユ":"yu","ヨ":"yo","ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro","ワ":"wa","ヲ":"wo","ン":"n"},
+  daku_h:{"が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go","ざ":"za","じ":["ji","zi"],"ず":"zu","ぜ":"ze","ぞ":"zo","だ":"da","ぢ":["ji","zi"],"づ":"zu","で":"de","ど":"do","ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo"},
+  daku_k:{"ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go","ザ":"za","ジ":["ji","zi"],"ズ":"zu","ゼ":"ze","ゾ":"zo","ダ":"da","ヂ":["ji","zi"],"ヅ":"zu","デ":"de","ド":"do","バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo"},
+  handaku_h:{"ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po"},
+  handaku_k:{"パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po"}
+};
+const ROWS = [["あ","い","う","え","お"],["か","き","く","け","こ"],["さ","し","す","せ","そ"],["た","ち","つ","て","と"],["な","に","ぬ","ね","の"],["は","ひ","ふ","へ","ほ"],["ま","み","む","め","も"],["や","ゆ","よ"],["ら","り","る","れ","ろ"],["わ","を","ん"]];
+const KATA_OF = {"あ":"ア","い":"イ","う":"ウ","え":"エ","お":"オ","か":"カ","き":"キ","く":"ク","け":"ケ","こ":"コ","さ":"サ","し":"シ","す":"ス","せ":"セ","そ":"ソ","た":"タ","ち":"チ","つ":"ツ","て":"テ","と":"ト","な":"ナ","に":"ニ","ぬ":"ヌ","ね":"ネ","の":"ノ","は":"ハ","ひ":"ヒ","ふ":"フ","へ":"ヘ","ほ":"ホ","ま":"マ","み":"ミ","む":"ム","め":"メ","も":"モ","や":"ヤ","ゆ":"ユ","よ":"ヨ","ら":"ラ","り":"リ","る":"ル","れ":"レ","ろ":"ロ","わ":"ワ","を":"ヲ","ん":"ン"};
+
+const WORDS = [
+["私","わたし","我"],["あなた","","你"],["人","ひと","人"],["子供","こども","孩子"],["家族","かぞく","家人"],["家","いえ","家（房子）"],["学校","がっこう","学校"],["先生","せんせい","老师"],["学生","がくせい","学生"],["会社","かいしゃ","公司"],["本","ほん","书"],["水","みず","水"],["お茶","おちゃ","茶"],["ご飯","ごはん","饭"],["食べ物","たべもの","食物"],["犬","いぬ","狗"],["猫","ねこ","猫"],["鳥","とり","鸟"],["魚","さかな","鱼"],["花","はな","花"],["山","やま","山"],["川","かわ","河流"],["空","そら","天空"],["雨","あめ","雨"],["電車","でんしゃ","电车"],["今日","きょう","今天"],["明日","あした","明天"],["昨日","きのう","昨天"],["朝","あさ","早晨"],["夜","よる","夜晚"],["今","いま","现在"],["行く","いく","去"],["来る","くる","来"],["見る","みる","看"],["食べる","たべる","吃"],["飲む","のむ","喝"],["話す","はなす","说话"],["読む","よむ","读"],["書く","かく","写"],["聞く","きく","听；问"],["買う","かう","买"],["大きい","おおきい","大的"],["小さい","ちいさい","小的"],["新しい","あたらしい","新的"],["古い","ふるい","旧的"],["多い","おおい","多的"],["少ない","すくない","少的"],["暑い","あつい","热的（天气）"],["寒い","さむい","冷的"],["美味しい","おいしい","好吃的"],["面白い","おもしろい","有趣的"],["忙しい","いそがしい","忙的"],["楽しい","たのしい","快乐的"]
+];
+
+/* ================= 工具 ================= */
+const $ = id => document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function accept(ans){ return Array.isArray(ans)?ans:[ans]; }
+
+/* ================= 导航 ================= */
+function switchTab(name){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));
+  ["home","kana","word"].forEach(t=>$("tab-"+t).classList.toggle("hidden",t!==name));
+}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+
+/* ================= 首页：今日单词 ================= */
+(function(){
+  const day = Math.floor(Date.now()/86400000);
+  const picked = shuffle([...WORDS]).slice(0,6);
+  $("daily-words").innerHTML = picked.map(w=>`<div class="word-cell"><div class="jp">${w[0]}</div><div class="kana">${w[1]||"—"}</div><div class="cn">${w[2]}</div></div>`).join("");
+})();
+
+/* ================= 假名练习 ================= */
+let kq=[], ki=0, kRight=0, kMiss=[];
+function buildKanaPool(){
+  const type=$("kana-type").value, range=$("kana-range").value;
+  let base=[];
+  if(range==="all") base = ROWS.flat().map(h=>({char: type==="hira"?h : type==="kata"?KATA_OF[h] : (Math.random()<.5?h:KATA_OF[h]), ans:KANA.hira[h]}));
+  else if(range==="4"){
+    const dh = type==="kata"?KANA.daku_k:KANA.daku_h, hh = type==="kata"?KANA.handaku_k:KANA.handaku_h;
+    base = [...Object.entries(dh),...Object.entries(hh)].map(([c,a])=>({char:c,ans:a}));
+    if(type==="mix") base = base.map(o=>({char:KANA.daku_h[o.char]!==undefined? (Math.random()<.5?o.char:KATA_OF[o.char]||o.char) : o.char, ans:o.ans}));
+  } else {
+    const idx = range==="1"?[0,1,2]:range==="2"?[3,4,5]:[6,7,8,9];
+    base = idx.map(i=>ROWS[i]).flat().map(h=>({char: type==="hira"?h : type==="kata"?KATA_OF[h] : (Math.random()<.5?h:KATA_OF[h]), ans:KANA.hira[h]}));
+  }
+  return base;
+}
+function kanaStart(){
+  kq = shuffle(buildKanaPool()); ki=0; kRight=0; kMiss=[];
+  $("kana-result").classList.add("hidden");
+  $("kana-play").classList.remove("hidden");
+  $("kana-fb").textContent=""; $("kana-fb").className="feedback";
+  $("kana-next").classList.add("hidden"); $("kana-submit").classList.remove("hidden");
+  kanaRender();
+}
+function kanaRender(){
+  const q=kq[ki];
+  $("kana-char").textContent=q.char;
+  $("kana-input").value=""; $("kana-input").focus();
+  $("kana-prog-text").textContent=`${ki} / ${kq.length}`;
+  $("kana-bar").style.width=(ki/kq.length*100)+"%";
+}
+function kanaSubmit(){
+  const q=kq[ki], v=$("kana-input").value.trim().toLowerCase();
+  if(!v) return;
+  const ok = accept(q.ans).includes(v);
+  const fb=$("kana-fb");
+  if(ok){ kRight++; fb.textContent="✓ 正确！"; fb.className="feedback ok"; }
+  else { kMiss.push({c:q.char,a:accept(q.ans)[0],y:v}); fb.innerHTML=`✗ 正确答案：<b>${accept(q.ans)[0]}</b>`; fb.className="feedback no"; }
+  $("kana-right").textContent=kRight;
+  $("kana-acc").textContent=Math.round(kRight/(ki+1)*100)+"%";
+  $("kana-submit").classList.add("hidden"); $("kana-next").classList.remove("hidden");
+  $("kana-next").focus();
+}
+function kanaNext(){
+  ki++;
+  if(ki>=kq.length){ kanaFinish(); return; }
+  $("kana-fb").textContent=""; $("kana-fb").className="feedback";
+  $("kana-next").classList.add("hidden"); $("kana-submit").classList.remove("hidden");
+  kanaRender();
+}
+function kanaFinish(){
+  $("kana-play").classList.add("hidden");
+  const total=kq.length, pct=Math.round(kRight/total*100);
+  const best=Math.max(pct, +(localStorage.getItem("kanaBest")||0));
+  localStorage.setItem("kanaBest",best); $("kana-best").textContent=best+"%";
+  let html=`<div class="score">${pct}%</div><p>共 ${total} 题，答对 ${kRight} 题，用时表现出色！</p>`;
+  if(kMiss.length){
+    html+=`<div class="miss-list">`+kMiss.map(m=>`<div class="miss-item"><span style="font-size:20px">${m.c}</span><span>正确 ${m.a} · 你的答案 ${m.y}</span></div>`).join("")+`</div>`;
+  }
+  html+=`<button class="btn" onclick="kanaStart()">再来一轮</button>`;
+  $("kana-result").innerHTML=html; $("kana-result").classList.remove("hidden");
+  $("kana-prog-text").textContent=`${total} / ${total}`; $("kana-bar").style.width="100%";
+}
+$("kana-start").onclick=kanaStart;
+$("kana-submit").onclick=kanaSubmit;
+$("kana-next").onclick=kanaNext;
+$("kana-input").addEventListener("keydown",e=>{if(e.key==="Enter"){ if(!$("kana-submit").classList.contains("hidden")) kanaSubmit(); else kanaNext(); }});
+$("kana-best").textContent=(localStorage.getItem("kanaBest")||"-")+"%";
+
+/* ================= 词汇练习 ================= */
+let wq=[], wi=0, wRight=0, wMiss=[];
+function wordStart(){
+  const n=Math.min(+($("word-count").value), WORDS.length);
+  wq=shuffle([...WORDS]).slice(0,n); wi=0; wRight=0; wMiss=[];
+  $("word-result").classList.add("hidden");
+  $("word-play").classList.remove("hidden");
+  $("word-fb").textContent=""; $("word-fb").className="feedback";
+  $("word-next").classList.add("hidden");
+  wordRender();
+}
+function wordRender(){
+  const q=wq[wi];
+  $("word-jp").textContent=q[0];
+  $("word-kana").textContent=q[1]?("（"+q[1]+"）"):"";
+  const opts=shuffle([q[2], ...shuffle(WORDS.filter(w=>w[2]!==q[2])).slice(0,3).map(w=>w[2])]);
+  $("word-choices").innerHTML=opts.map(o=>`<button class="choice" data-v="${o.replace(/"/g,"&quot;")}">${o}</button>`).join("");
+  $("word-prog-text").textContent=`${wi} / ${wq.length}`;
+  $("word-bar").style.width=(wi/wq.length*100)+"%";
+  document.querySelectorAll("#word-choices .choice").forEach(b=>b.onclick=()=>wordAnswer(b,q));
+}
+function wordAnswer(btn,q){
+  const ok=btn.dataset.v===q[2];
+  const fb=$("word-fb");
+  document.querySelectorAll("#word-choices .choice").forEach(b=>{
+    b.disabled=true;
+    if(b.dataset.v===q[2]) b.classList.add("right");
+  });
+  if(ok){ wRight++; fb.textContent="✓ 正确！"; fb.className="feedback ok"; }
+  else { btn.classList.add("wrong"); wMiss.push(q); fb.innerHTML=`✗ 正确答案：<b>${q[2]}</b>`; fb.className="feedback no"; }
+  $("word-right").textContent=wRight;
+  $("word-acc").textContent=Math.round(wRight/(wi+1)*100)+"%";
+  $("word-next").classList.remove("hidden"); $("word-next").focus();
+}
+$("word-next").onclick=()=>{
+  wi++;
+  if(wi>=wq.length){ wordFinish(); return; }
+  $("word-fb").textContent=""; $("word-fb").className="feedback";
+  $("word-next").classList.add("hidden");
+  wordRender();
+};
+function wordFinish(){
+  $("word-play").classList.add("hidden");
+  const total=wq.length, pct=Math.round(wRight/total*100);
+  const best=Math.max(pct, +(localStorage.getItem("wordBest")||0));
+  localStorage.setItem("wordBest",best); $("word-best").textContent=best+"%";
+  let html=`<div class="score">${pct}%</div><p>共 ${total} 题，答对 ${wRight} 题。</p>`;
+  if(wMiss.length){
+    html+=`<div class="miss-list">`+wMiss.map(m=>`<div class="miss-item"><span>${m[0]} ${m[1]?"· "+m[1]:""}</span><span>${m[2]}</span></div>`).join("")+`</div>`;
+  }
+  html+=`<button class="btn" onclick="wordStart()">再来一轮</button>`;
+  $("word-result").innerHTML=html; $("word-result").classList.remove("hidden");
+  $("word-prog-text").textContent=`${total} / ${total}`; $("word-bar").style.width="100%";
+}
+$("word-start").onclick=wordStart;
+$("word-best").textContent=(localStorage.getItem("wordBest")||"-")+"%";
+</script>
+</body>
+</html>
